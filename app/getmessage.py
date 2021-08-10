@@ -10,6 +10,7 @@ ticket_id = []
 
 apidata = APIData.objects.values_list('number')
 
+
 for i in range(0,len(apidata)):
     numb = apidata[i]
     numb = numb[0]

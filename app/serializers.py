@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import APIData,TemplateData,SenderData
+from .models import APIData,TemplateData,SenderData,MessageTemplate,CreateContact
 
 class ApiSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,5 +15,15 @@ class MsgSerializer(serializers.ModelSerializer):
     class Meta:
         model = SenderData
         fields = ['text','created','t_id']
+
+class MessageTemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MessageTemplate
+        fields = "__all__"
+
+class CreateContactSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CreateContact
+        fields = "__all__"
 
       

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import APIData,TemplateData,SenderData
+from .models import TemplateData,SenderData,APIData,MessageTemplate,CreateContact
 
 admin.site.register(APIData)
 class APIDataAdmin(admin.ModelAdmin):
@@ -12,6 +12,14 @@ class TemplateDataAdmin(admin.ModelAdmin):
 admin.site.register(SenderData)
 class SenderDataAdmin(admin.ModelAdmin):
     list_display = ['text','created','t_id']
+
+admin.site.register(MessageTemplate)
+class MessageTemplateAdmin(admin.ModelAdmin):
+    list_display = ['number', 'name', 'val', 'broadcast_name','template_name']
+
+admin.site.register(CreateContact)
+class CreateContactAdmin(admin.ModelAdmin):
+    list_display = ['number', 'name', 'val', 'fullName']
 
 
 

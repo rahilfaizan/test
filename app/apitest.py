@@ -1,10 +1,11 @@
 import requests
 import json
-from .models import APIData
+# from .models import APIData
 
 cnumb = []
 cnam = []
 cstat = []
+data = {}
 
 url = "https://live-server-2553.wati.io/api/v1/getContacts"
 
@@ -29,6 +30,10 @@ for d in range(0, len(data["contact_list"])):
         #print(cnam)
     #if contact_status not in cstat:
     cstat.append(contact_status)
+
+# print(cnumb)
+# print(cnam)
+# print(cstat)
 
 
 

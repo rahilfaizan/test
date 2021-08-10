@@ -9,4 +9,6 @@ urlpatterns = [
     path('contactapi/', views.ApiList.as_view()),
     path('tempapi/', views.TempList.as_view()),
     path('msgapi/', views.SndList.as_view()),
+    path('postmessage/', views.PostMessage),
+    path('postcontact/', views.PostContact),
 ]
