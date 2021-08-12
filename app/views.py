@@ -2,61 +2,129 @@ from django.http import response
 from django.http.response import JsonResponse
 from django.shortcuts import render
 import requests
-from .models import TemplateData,SenderData,APIData,CreateContact,MessageTemplate
-from .import apitest,templatedata,getmessage
-from .serializers import TempSerializer,MsgSerializer,ApiSerializer,MessageTemplateSerializer,CreateContactSerializer
+from .models import TemplateData,APIData,CreateContact,MessageTemplate,Webhook,Conversation
+
+from .serializers import TempSerializer,ApiSerializer,MessageTemplateSerializer,CreateContactSerializer,WebhookSerializer,ConversationSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import serializers, status
 
 from rest_framework.generics import ListAPIView
-
+from rest_framework.views import APIView
 from app import serializers
 
-cnumb = apitest.cnumb
-cname = apitest.cnam
-cstatus = apitest.cstat
-
-id = templatedata.id
-e_name = templatedata.e_name
-cat = templatedata.cat
-body = templatedata.body
-
-text1 = getmessage.text
-created1 = getmessage.created
-t_id1 = getmessage.ticket_id
 
 
-orderOf = apitest.data
-class ApiList(ListAPIView):
-    for i in range(0, len(orderOf["contact_list"])):
+# orderOf = apitest.data
+class ApiList(APIView):
+
+    def get(self, request, format=None):
+
+        cnumb = []
+        cnam = []
+        cstat = []
+        data = {}
+
+        url = "https://live-server-2553.wati.io/api/v1/getContacts"
+
+
+        headers = {"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0MzE5NjQxMC1iNDA2LTQ0ZDktOWFiYy1lZTE5ZmZiZWMzNWEiLCJ1bmlxdWVfbmFtZSI6IlNvbmFtQGtzbGVnYWwuY28uaW4iLCJuYW1laWQiOiJTb25hbUBrc2xlZ2FsLmNvLmluIiwiZW1haWwiOiJTb25hbUBrc2xlZ2FsLmNvLmluIiwiYXV0aF90aW1lIjoiMDgvMDMvMjAyMSAwNToyOToxNCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFETUlOSVNUUkFUT1IiLCJleHAiOjI1MzQwMjMwMDgwMCwiaXNzIjoiQ2xhcmVfQUkiLCJhdWQiOiJDbGFyZV9BSSJ9.d8Z083VdTnmkv4k86NTY6oU6PhRhEi_ldUc-7cHN9Sg"}
+
+        response = requests.request("GET", url, headers=headers)
+
+        if response.status_code == 200:
+
+
+            data = response.json()
+
+            for d in range(0, len(data["contact_list"])):
+                contact_number = data["contact_list"][d]["wAid"]
+                contact_name = data["contact_list"][d]["fullName"]
+                contact_status = data["contact_list"][d]["contactStatus"]
+
+
+                cnumb.append(contact_number)
+
+                cnam.append(contact_name)
+
+                cstat.append(contact_status)
+
+
+
+
+            for i in range(0, len(data["contact_list"])):
+                
+                
+                
+                APIData.objects.update_or_create(number=cnumb[i],name=cnam[i],status=cstat[i])
+            queryset = APIData.objects.all()
+            serializer = ApiSerializer(queryset,many = True)
+            # filterset_fields = ['number','name','status']
+
+            response = {
+                'status': True,
+                'message': 'Data fetched successfully.',
+                'data': serializer.data
+            }
+            return Response(response, status=status.HTTP_200_OK)
+
         
+
+        return Response("ERROR",status=status.HTTP_400_BAD_REQUEST)
+
+
+# order = templatedata.data
+class TempList(APIView):
+    def get(self, request, format=None):
+        id = []
+        e_name = []
+        cat = []
+        body = []
+
+        url = "https://live-server-2553.wati.io/api/v1/getMessageTemplates"
+
+
+        headers = {"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiI0MzE5NjQxMC1iNDA2LTQ0ZDktOWFiYy1lZTE5ZmZiZWMzNWEiLCJ1bmlxdWVfbmFtZSI6IlNvbmFtQGtzbGVnYWwuY28uaW4iLCJuYW1laWQiOiJTb25hbUBrc2xlZ2FsLmNvLmluIiwiZW1haWwiOiJTb25hbUBrc2xlZ2FsLmNvLmluIiwiYXV0aF90aW1lIjoiMDgvMDMvMjAyMSAwNToyOToxNCIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFETUlOSVNUUkFUT1IiLCJleHAiOjI1MzQwMjMwMDgwMCwiaXNzIjoiQ2xhcmVfQUkiLCJhdWQiOiJDbGFyZV9BSSJ9.d8Z083VdTnmkv4k86NTY6oU6PhRhEi_ldUc-7cHN9Sg"}
+
+        response = requests.request("GET", url, headers=headers)
+
+        if response.status_code == 200:
+
         
-        # x.append(APIData(number=cnumb[i], name=cname[i], status=cstatus[i]))
-        # if i % 100 == 0:
-        APIData.objects.update_or_create(number=cnumb[i],name=cname[i],status=cstatus[i])
-    queryset = APIData.objects.all()
-    serializer_class = ApiSerializer
-    filterset_fields = ['number','name','status']
+            data = response.json()
+            for d in range(0, len(data["messageTemplates"])):
+                template_id = data["messageTemplates"][d]["id"]
+                template_ename = data["messageTemplates"][d]["elementName"]
+                template_cat = data["messageTemplates"][d]["category"]
+                template_body = data["messageTemplates"][d]["body"]
+
+                id.append(template_id)
+
+                e_name.append(template_ename)
+
+                cat.append(template_cat)
+                body.append(template_body)
 
 
-order = templatedata.data
-class TempList(ListAPIView):
-    for i in range(0, len(order["messageTemplates"])):
-                TemplateData.objects.update_or_create(id=id[i],element_name=e_name[i],category=cat[i],body=body[i])
-    queryset = TemplateData.objects.all()
-    serializer_class = TempSerializer
-    filterset_fields = ['id','element_name','category','body']
 
-orderm = []
-for i in range(0,11):
-    orderm.append(getmessage.data)
-class SndList(ListAPIView):
-        for i in range(0, 11):
-                    SenderData.objects.update_or_create(text = text1[i] , created = created1[i] ,t_id = t_id1[i])
-        queryset = SenderData.objects.all()
-        serializer_class = MsgSerializer
-        filterset_fields = ['text','created','t_id']
+            for i in range(0, len(data["messageTemplates"])):
+                        TemplateData.objects.update_or_create(id=id[i],element_name=e_name[i],category=cat[i],body=body[i])
+            queryset = TemplateData.objects.all()
+            serializer = TempSerializer(queryset,many = True)
+            # filterset_fields = ['id','element_name','category','body']
+
+            response = {
+                'status': True,
+                'message': 'Data fetched successfully.',
+                'data': serializer.data
+            }
+            return Response(response, status=status.HTTP_200_OK)
+
+        
+
+        return Response("ERROR",status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 @api_view(['POST'])
@@ -67,7 +135,12 @@ def PostMessage(request):
         serialize = MessageTemplateSerializer(data=res)
         if serialize.is_valid():
             MessageTemplate.objects.update_or_create(number = res['number'] , name = res['name'], val = res['val'] , broadcast_name = res['broadcast_name'], template_name = res['template_name'])
-        
+
+        serializer = ConversationSerializer(data = res)
+        if serializer.is_valid():
+            Conversation.objects.create(id=res['number']+"123",receiver_id = res['number'] , text = res)
+
+
         url = "https://live-server-2553.wati.io/api/v1/sendTemplateMessage"
         payload = "{\"parameters\":[{\"name\":\""+res['name']+'\",\"value\":\"'+res['val']+"\"}],\"broadcast_name\":\""+res['broadcast_name']+"\",\"template_name\":\""+res['template_name']+"\"}"
 
@@ -92,8 +165,17 @@ def PostContact(request):
         serialize = CreateContactSerializer(data=res)
         if serialize.is_valid():
             CreateContact.objects.update_or_create(number = res['number'] , name = res['name'], val = res['val'] , fullName = res['fullName'])
-            
-        url = "https://live-server-2553.wati.io/api/v1/addContact/"+res['number']
+        if res['number'][:2] == "91" and len(res['number']==12):   
+            url = "https://live-server-2553.wati.io/api/v1/addContact/"+res['number']
+
+        elif res['number'][0] == "0" and len(res['number']==11):
+            res["number"] = res["number"][1:]
+            url = "https://live-server-2553.wati.io/api/v1/addContact/91"+res['number']
+
+
+        else:
+            url = "https://live-server-2553.wati.io/api/v1/addContact/91"+res['number']
+
         payload = "{\"customParams\":[{\"name\":\""+res['name']+'\",\"value\":\"'+res['val']+"\"}],\"name\":\""+res['fullName']+"\"}"
 
 
@@ -112,4 +194,46 @@ def PostContact(request):
 
     
 
+
+class GetMsg(APIView):
+    def get(self, request, format=None):
+
+
+        response = requests.request("GET",url = '')
+
+        if response.status_code == 200:
+
+        
+            data = response.json()
+
+            Webhook.objects.create(ticketId=data['ticketId'],text=data['text'],eventType=data['eventType'],statusString=data['statusString'],waId = data['waId'])
+            queryset = Webhook.objects.all()
+            serializer = WebhookSerializer(queryset,many = True)
+            filterset_fields = ['waId']
+
+            response = {
+                'status': True,
+                'message': 'Data fetched successfully.',
+                'data': serializer.data
+            }
+            return Response(response, status=status.HTTP_200_OK)
+
+        
+
+        return Response("ERROR",status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class Conversation(APIView):
+    pass
+    # def post(self,request,format=None):
+    #     if request.method == "POST":
+    #         res = request.data
+
+    #         serialize = ConversationSerializer(data=res)
+    #         if serialize.is_valid():
+
+    #             Conversation.objects.create(id=res['id'],res=data['text'],eventType=data['eventType'],statusString=data['statusString'],waId = data['waId'])
+
+            
 
