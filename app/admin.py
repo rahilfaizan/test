@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import TemplateData,APIData,MessageTemplate,CreateContact
+from .models import TemplateData,APIData,MessageTemplate,CreateContact,Webhook,Conversation
 
 admin.site.register(APIData)
 class APIDataAdmin(admin.ModelAdmin):
@@ -17,6 +17,15 @@ class MessageTemplateAdmin(admin.ModelAdmin):
 admin.site.register(CreateContact)
 class CreateContactAdmin(admin.ModelAdmin):
     list_display = ['number', 'name', 'val', 'fullName']
+
+
+admin.site.register(Webhook)
+class WebhookAdmin(admin.ModelAdmin):
+    list_display = ['id', 'receiver_id', 'ticketId', 'text','eventType','statusString','waId','conversationId']
+
+admin.site.register(Conversation)
+class ConversationAdmin(admin.ModelAdmin):
+    list_display = ['id', 'receiver_id','text','sent']
 
 
 

@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 
 class APIData(models.Model):
@@ -20,6 +21,7 @@ class MessageTemplate(models.Model):
     val = models.CharField(max_length=20)
     broadcast_name = models.CharField(max_length=20)
     template_name = models.CharField(max_length=20)
+    sent = models.DateTimeField(default=datetime.now, blank=True)
 
 class CreateContact(models.Model):
     number = models.CharField(max_length=20)
@@ -38,17 +40,13 @@ class Webhook(models.Model):
     statusString = models.CharField(max_length=255)
     waId = models.CharField(max_length=255)
     conversationId = models.CharField(max_length=255,null=True,blank=True)
+    sent = models.DateTimeField(default=datetime.now, blank=True)
 
 
 class Conversation(models.Model):
-    id = models.CharField(primary_key=True,max_length=50)
+    sender = models.CharField(max_length=50,null=True,blank=True)
     receiver_id = models.CharField(max_length=50,null=True,blank=True)
     conversationId = models.CharField(max_length=255,null=True,blank=True)
     text = models.TextField()
     number = models.CharField(max_length=255)
-
-
-
-
-    
-
+    sent = models.DateTimeField(default=datetime.now, blank=True)
